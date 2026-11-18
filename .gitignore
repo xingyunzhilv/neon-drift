@@ -1,0 +1,60 @@
+# Unity / Tuanjie generated files
+[Ll]ibrary/
+[Tt]emp/
+[Ll]ogs/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+[Cc]rash[Rr]eports/
+sysinfo.txt
+crashlytics-build.properties
+*.unitypackage
+*.apk
+*.aab
+*.unityproj
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+.vs/
+.vscode/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+
+# Tuanjie Cowork / Codely AI plugin local cache (large DB + fonts)
+.codely-cli/
+.codely.packages/
+.codelyignore
+
+# Local verification and build scratch
+.tmpl/
+.verify/
+verify/
+.portfolio_stage/
+.edgeprofile*/
+__probe*.html
+__shot.html
+*.log
+
+# Local publish credentials (never commit)
+.github_pat
+*.pat
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

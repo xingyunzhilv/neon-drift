@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img">
+<title>NEON DRIFT 运行画面示意</title>
+<desc>三轨道无尽飞行 3D 游戏：霓虹透视网格赛道、飞船、障碍物与 HUD。</desc>
+<rect width="800" height="400" fill="#080816"/>
+<rect x="0" y="0" width="800" height="158" fill="#0d0b24"/>
+<circle cx="400" cy="150" r="86" fill="#2a1550" opacity="0.55"/>
+<circle cx="400" cy="150" r="52" fill="#3d1d6e" opacity="0.5"/>
+<path d="M0 158 H800" stroke="#ff4fa3" stroke-width="2" opacity="0.8"/>
+<g stroke="#5b3aa6" stroke-width="1" opacity="0.55">
+<path d="M400 158 L-520 400 M400 158 L-300 400 M400 158 L-120 400 M400 158 L40 400 M400 158 L180 400 M400 158 L300 400 M400 158 L400 400 M400 158 L500 400 M400 158 L620 400 M400 158 L760 400 M400 158 L920 400 M400 158 L1120 400 M400 158 L1320 400"/>
+</g>
+<g stroke="#38f5e0" stroke-width="1" opacity="0.3">
+<path d="M0 170 H800 M0 186 H800 M0 207 H800 M0 235 H800 M0 272 H800 M0 320 H800 M0 380 H800"/>
+</g>
+<g stroke="#38f5e0" stroke-width="2" opacity="0.85">
+<path d="M400 158 L118 400 M400 158 L306 400 M400 158 L494 400 M400 158 L682 400"/>
+</g>
+<g opacity="0.9">
+<rect x="164" y="196" width="30" height="7" fill="#ff4f6d"/>
+<rect x="168" y="203" width="22" height="4" fill="#7a1f36"/>
+<rect x="606" y="196" width="30" height="7" fill="#ff4f6d"/>
+<rect x="610" y="203" width="22" height="4" fill="#7a1f36"/>
+</g>
+<g opacity="0.85">
+<rect x="238" y="256" width="112" height="9" fill="#ff9d3c"/>
+<rect x="238" y="265" width="112" height="4" fill="#8a4c14"/>
+</g>
+<g opacity="0.9">
+<path d="M400 300 L378 342 L400 334 L422 342 Z" fill="#0d2f3a" stroke="#38f5e0" stroke-width="2.5"/>
+<path d="M400 306 L392 330 L400 326 L408 330 Z" fill="#38f5e0" opacity="0.85"/>
+<path d="M386 340 L378 356 L390 348 Z M414 340 L422 356 L410 348 Z" fill="#ff4fa3" opacity="0.9"/>
+</g>
+<g fill="#c9f7f1" font-family="monospace">
+<text x="24" y="30" font-size="15" letter-spacing="3">SCORE  000000</text>
+<text x="24" y="52" font-size="12" fill="#7de9dc">COMBO  x1</text>
+<text x="672" y="30" font-size="13" letter-spacing="2">SHIELD</text>
+</g>
+<g fill="#38f5e0">
+<circle cx="676" cy="46" r="5"/><circle cx="692" cy="46" r="5"/><circle cx="708" cy="46" r="5"/>
+</g>
+<text x="400" y="82" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="42" font-weight="bold" letter-spacing="9">NEON DRIFT</text>
+<text x="400" y="108" text-anchor="middle" fill="#9d8fd6" font-family="sans-serif" font-size="14" letter-spacing="2">三轨道无尽飞行 · 3D 跑酷原型</text>
+<text x="400" y="386" text-anchor="middle" fill="#6f6aa8" font-family="monospace" font-size="11">A/D 变轨 · W 跃升 · S 下沉 · P 暂停 · R 重开</text>
+</svg>

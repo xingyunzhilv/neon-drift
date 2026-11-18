@@ -1,0 +1,296 @@
+<!-- NEON DRIFT 面试讲解面板片段
+ * 由 tests/build_showcase.js 注入 web/standalone.html 生成 web/showcase.html。
+ * 面板中的 CODE 占位符会被构建脚本替换为工程里的真实源码片段。
+-->
+<style id="ndb-style">
+  #ndb-toggle{position:fixed;top:16px;right:16px;z-index:10001;pointer-events:auto;
+    font:600 12px/1 'Segoe UI',system-ui,'Microsoft YaHei',sans-serif;letter-spacing:.08em;
+    color:#38f5e0;background:rgba(7,14,28,.9);border:1px solid rgba(56,245,224,.5);
+    border-radius:9px;padding:11px 15px;cursor:pointer;box-shadow:0 0 20px rgba(56,245,224,.18);
+    backdrop-filter:blur(10px);transition:box-shadow .2s,transform .2s}
+  #ndb-toggle:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(56,245,224,.45)}
+  /* 面板展开后让出右上角，避免压住面板内的关闭按钮 */
+  body.ndb-panel-open #ndb-toggle{opacity:0;pointer-events:none;transform:translateX(24px)}
+  #ndb-toggle span{display:block;font:400 9px/1.6 'Consolas',monospace;color:#7f93ad;letter-spacing:.12em;margin-top:3px}
+  #ndb-panel{position:fixed;top:0;right:0;bottom:0;width:min(560px,94vw);z-index:10000;
+    background:rgba(7,11,23,.96);border-left:1px solid rgba(56,245,224,.28);
+    box-shadow:-24px 0 70px rgba(0,0,0,.6);backdrop-filter:blur(16px);
+    transform:translateX(102%);transition:transform .32s cubic-bezier(.22,.8,.28,1);
+    overflow-y:auto;overscroll-behavior:contain;color:#dce9f7;
+    font:13px/1.65 'Segoe UI',system-ui,'Microsoft YaHei',sans-serif}
+  #ndb-panel.ndb-open{transform:translateX(0)}
+  #ndb-panel::-webkit-scrollbar{width:8px}
+  #ndb-panel::-webkit-scrollbar-thumb{background:rgba(120,180,255,.25);border-radius:4px}
+  .ndb-wrap{padding:26px 26px 44px}
+  .ndb-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:6px}
+  .ndb-kicker{font:11px/1.4 'Consolas',monospace;letter-spacing:.26em;color:#a06bff}
+  .ndb-title{margin:6px 0 0;font:500 27px/1.1 'Consolas',monospace;letter-spacing:.12em;color:#fff}
+  .ndb-title em{font-style:normal;color:#38f5e0;text-shadow:0 0 22px rgba(56,245,224,.5)}
+  .ndb-close{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.04);color:#9fb3cc;cursor:pointer;font-size:16px;line-height:1}
+  .ndb-close:hover{color:#fff;border-color:rgba(56,245,224,.5)}
+  .ndb-sub{font-size:12px;color:#91a6c0;margin:10px 0 14px;line-height:1.7}
+  .ndb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+  .ndb-chip{font:10px/1 'Consolas',monospace;letter-spacing:.06em;color:#9fd8ff;
+    border:1px solid rgba(120,180,255,.25);background:rgba(80,140,220,.09);border-radius:5px;padding:6px 8px}
+  .ndb-sec{margin:0 0 26px}
+  .ndb-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;padding-bottom:8px;
+    border-bottom:1px solid rgba(120,180,255,.16)}
+  .ndb-h b{font:11px/1 'Consolas',monospace;color:#38f5e0;letter-spacing:.1em}
+  .ndb-h span{font-size:14px;font-weight:600;color:#eaf6ff;letter-spacing:.02em}
+  .ndb-h i{font-style:normal;font-size:11px;color:#6f839e;margin-left:auto}
+  .ndb-p{font-size:12.5px;color:#a9bdd4;margin:0 0 12px}
+  .ndb-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+  .ndb-key{font-size:11px;color:#c8d9ec;background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 9px}
+  .ndb-key kbd{font:11px 'Consolas',monospace;color:#38f5e0;display:block;margin-bottom:3px}
+  .ndb-arch{width:100%;height:auto;display:block;border:1px solid rgba(120,180,255,.15);
+    border-radius:10px;background:rgba(4,8,18,.6);padding:6px}
+  .ndb-cap{font-size:11px;color:#6f839e;margin:8px 0 0;text-align:center}
+  .ndb-card{border:1px solid rgba(120,180,255,.16);border-radius:11px;
+    background:linear-gradient(180deg,rgba(16,26,46,.62),rgba(10,16,30,.4));
+    padding:14px 15px;margin-bottom:12px}
+  .ndb-card h3{margin:0 0 6px;font-size:13.5px;font-weight:600;color:#eaf6ff;letter-spacing:.02em}
+  .ndb-card h3 b{font:10px 'Consolas',monospace;color:#ff4fa3;margin-right:8px;letter-spacing:.08em}
+  .ndb-card p{margin:0 0 10px;font-size:12px;color:#a2b7d0;line-height:1.62}
+  .ndb-card p strong{color:#ffc861;font-weight:600}
+  .ndb-ask{font-size:11px;color:#8ba2bf;border-left:2px solid rgba(160,107,255,.6);
+    padding-left:9px;margin:0 0 10px;line-height:1.6}
+  .ndb-code{background:#050a16;border:1px solid rgba(120,180,255,.14);border-radius:8px;
+    margin:0 0 8px;padding:10px 12px;overflow:auto;max-height:210px;
+    font:11px/1.6 'Consolas','SF Mono',monospace;color:#c3d5e8;white-space:pre;tab-size:4}
+  .ndb-code code{font:inherit;color:inherit}
+  .ndb-c{color:#5f7690}.ndb-s{color:#ffc861}.ndb-k{color:#a06bff}
+  .ndb-file{font:10px 'Consolas',monospace;color:#6f839e;margin:0 0 8px;letter-spacing:.04em}
+  .ndb-list{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin:0;padding:0;list-style:none}
+  .ndb-list li{font:11px/1.7 'Consolas',monospace;color:#a9bdd4}
+  .ndb-list li::before{content:'▸ ';color:#38f5e0}
+  .ndb-note{font-size:11.5px;color:#91a6c0;background:rgba(255,200,97,.06);
+    border:1px solid rgba(255,200,97,.22);border-radius:9px;padding:12px 14px;line-height:1.7}
+  .ndb-note b{color:#ffc861}
+  details.ndb-q{border:1px solid rgba(120,180,255,.14);border-radius:9px;
+    background:rgba(255,255,255,.025);margin-bottom:7px;padding:9px 12px}
+  details.ndb-q summary{cursor:pointer;font-size:12.5px;color:#dce9f7;font-weight:500;list-style:none}
+  details.ndb-q summary::-webkit-details-marker{display:none}
+  details.ndb-q summary::before{content:'+ ';color:#38f5e0;font-family:monospace}
+  details.ndb-q[open] summary::before{content:'− '}
+  details.ndb-q p{margin:9px 0 0;font-size:11.5px;color:#9db3cd;line-height:1.7}
+  .ndb-foot{font:10px/1.7 'Consolas',monospace;color:#5d7189;
+    border-top:1px solid rgba(120,180,255,.12);padding-top:14px;margin-top:6px}
+  .ndb-reading #pause{display:none!important}
+  @media (max-width:600px){.ndb-wrap{padding:20px 18px 36px}.ndb-keys,.ndb-list{grid-template-columns:1fr 1fr}}
+</style>
+
+<button id="ndb-toggle" type="button" aria-label="打开作品讲解">作品讲解 / TECH BRIEF<span>F2 · 打开时游戏自动暂停</span></button>
+
+<aside id="ndb-panel" aria-label="NEON DRIFT 作品讲解">
+  <div class="ndb-wrap">
+    <div class="ndb-top">
+      <div>
+        <div class="ndb-kicker">UNITY 3D PORTFOLIO · TECH BRIEF</div>
+        <h2 class="ndb-title">NEON <em>DRIFT</em></h2>
+      </div>
+      <button class="ndb-close" id="ndb-close" type="button" aria-label="关闭">×</button>
+    </div>
+    <p class="ndb-sub">三轨道无尽飞行 3D 原型。赛道、飞船、障碍、HUD 与地面网格着色器<b style="color:#eaf6ff">全部由代码生成</b>，不依赖任何外部美术资源；同一套设计分别实现为 Unity C# 工程与浏览器镜像版。</p>
+    <div class="ndb-chips">
+      <span class="ndb-chip">Unity / C#</span><span class="ndb-chip">程序化关卡生成</span>
+      <span class="ndb-chip">自定义 Shader</span><span class="ndb-chip">对象池</span>
+      <span class="ndb-chip">零美术资源</span>
+    </div>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>01</b><span>先跑起来</span><i>左侧是可玩的实时画面</i></div>
+      <p class="ndb-p">点游戏中央「开始飞行」，或直接按 <b style="color:#38f5e0">Enter</b>。打开本面板时游戏会自动暂停，关闭后继续。</p>
+      <div class="ndb-keys">
+        <div class="ndb-key"><kbd>A / D · ← →</kbd>切换轨道</div>
+        <div class="ndb-key"><kbd>W / 空格</kbd>跃升躲地面方块</div>
+        <div class="ndb-key"><kbd>S / ↓</kbd>下沉躲高空横梁</div>
+        <div class="ndb-key"><kbd>P</kbd>暂停 / 继续</div>
+        <div class="ndb-key"><kbd>R</kbd>随时重开</div>
+        <div class="ndb-key"><kbd>F2</kbd>开合本面板</div>
+      </div>
+      <p class="ndb-cap">也支持触屏滑动与鼠标拖拽，手机打开同样可玩。</p>
+    </section>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>02</b><span>Unity 工程架构</span><i>参数注入 · 无全局单例</i></div>
+      <svg class="ndb-arch" viewBox="0 0 520 236" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="工程架构图">
+        <defs>
+          <marker id="ndb-arw" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#38f5e0" opacity=".8"/>
+          </marker>
+        </defs>
+        <rect x="150" y="8" width="220" height="36" rx="8" fill="rgba(160,107,255,.13)" stroke="#a06bff" stroke-opacity=".7"/>
+        <text x="260" y="24" text-anchor="middle" fill="#eaf6ff" font-family="Consolas,monospace" font-size="12">GameBootstrap.cs</text>
+        <text x="260" y="38" text-anchor="middle" fill="#8fa6c0" font-size="9.5">[RuntimeInitializeOnLoadMethod] 零配置启动</text>
+        <path d="M260 44 V56" stroke="#38f5e0" stroke-opacity=".7" fill="none" marker-end="url(#ndb-arw)"/>
+
+        <rect x="150" y="58" width="220" height="38" rx="8" fill="rgba(56,245,224,.11)" stroke="#38f5e0" stroke-opacity=".75"/>
+        <text x="260" y="75" text-anchor="middle" fill="#ffffff" font-family="Consolas,monospace" font-size="12.5">GameManager.cs</text>
+        <text x="260" y="89" text-anchor="middle" fill="#8fa6c0" font-size="9.5">状态机 ready→playing→over · 装配 · 计分</text>
+
+        <path d="M260 96 V110 H67 V122" stroke="#38f5e0" stroke-opacity=".45" fill="none" marker-end="url(#ndb-arw)"/>
+        <path d="M260 96 V110 H195 V122" stroke="#38f5e0" stroke-opacity=".45" fill="none" marker-end="url(#ndb-arw)"/>
+        <path d="M260 96 V110 H323 V122" stroke="#38f5e0" stroke-opacity=".45" fill="none" marker-end="url(#ndb-arw)"/>
+        <path d="M260 96 V110 H451 V122" stroke="#38f5e0" stroke-opacity=".45" fill="none" marker-end="url(#ndb-arw)"/>
+
+        <rect x="8" y="124" width="118" height="50" rx="8" fill="rgba(255,79,163,.09)" stroke="#ff4fa3" stroke-opacity=".5"/>
+        <text x="67" y="143" text-anchor="middle" fill="#eaf6ff" font-family="Consolas,monospace" font-size="10.5">TrackGenerator</text>
+        <text x="67" y="158" text-anchor="middle" fill="#8fa6c0" font-size="9">生成 + 扫掠碰撞</text>
+        <text x="67" y="169" text-anchor="middle" fill="#8fa6c0" font-size="9">可解性保证</text>
+
+        <rect x="136" y="124" width="118" height="50" rx="8" fill="rgba(255,200,97,.09)" stroke="#ffc861" stroke-opacity=".5"/>
+        <text x="195" y="143" text-anchor="middle" fill="#eaf6ff" font-family="Consolas,monospace" font-size="10.5">PlayerController</text>
+        <text x="195" y="158" text-anchor="middle" fill="#8fa6c0" font-size="9">三轨 / 跃升 / 下沉</text>
+        <text x="195" y="169" text-anchor="middle" fill="#8fa6c0" font-size="9">随姿态变化的碰撞盒</text>
+
+        <rect x="264" y="124" width="118" height="50" rx="8" fill="rgba(160,107,255,.09)" stroke="#a06bff" stroke-opacity=".5"/>
+        <text x="323" y="143" text-anchor="middle" fill="#eaf6ff" font-family="Consolas,monospace" font-size="10.5">WorldBuilder</text>
+        <text x="323" y="158" text-anchor="middle" fill="#8fa6c0" font-size="9">程序化美术 + Pool</text>
+        <text x="323" y="169" text-anchor="middle" fill="#8fa6c0" font-size="9">NeonGrid.shader</text>
+
+        <rect x="392" y="124" width="118" height="50" rx="8" fill="rgba(56,245,224,.08)" stroke="#38f5e0" stroke-opacity=".45"/>
+        <text x="451" y="143" text-anchor="middle" fill="#eaf6ff" font-family="Consolas,monospace" font-size="10.5">CameraRig / HUD</text>
+        <text x="451" y="158" text-anchor="middle" fill="#8fa6c0" font-size="9">阻尼跟随 · FOV</text>
+        <text x="451" y="169" text-anchor="middle" fill="#8fa6c0" font-size="9">运行时构建 UGUI</text>
+
+        <rect x="60" y="192" width="400" height="32" rx="8" fill="rgba(120,180,255,.06)" stroke="#6f8bb0" stroke-opacity=".45" stroke-dasharray="4 3"/>
+        <text x="260" y="206" text-anchor="middle" fill="#c3d5e8" font-family="Consolas,monospace" font-size="10.5">GameConfig.cs · ScriptableObject 数据驱动</text>
+        <text x="260" y="218" text-anchor="middle" fill="#8fa6c0" font-size="9">速度 / 轨道 / 难度 / 生成间距集中配置，逻辑层不写死数值</text>
+      </svg>
+      <p class="ndb-cap">编辑器另有 SceneBuilder.cs：Tools → Neon Drift → Bake Environment Scene，可烘焙成可在 Scene 视图编辑的 .unity 场景。</p>
+    </section>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>03</b><span>四个能撑住追问的设计</span><i>下方均为工程真实源码</i></div>
+
+      <div class="ndb-card">
+        <h3><b>01</b>关卡一定可解</h3>
+        <p>按<strong>行进距离</strong>而非时间触发生成，速度变化时障碍间距依然稳定；每行最多占用 <code>laneCount - 1</code> 条轨道，<strong>永远留一条空轨道</strong>，并把晶体放在这条安全路径上作为引导。难度只改速度、间距和双障碍概率，不突破这条约束。</p>
+        <p class="ndb-ask">追问「怎么保证不会生成死局」→ 讲洗牌后取前 count 条、freeLane 从剩余轨道里选；count 被 Min 限制在 laneCount-1。</p>
+        <div class="ndb-file">unity/Assets/Scripts/TrackGenerator.cs · SpawnRow()</div>
+        {{CODE:spawn}}
+      </div>
+
+      <div class="ndb-card">
+        <h3><b>02</b>扫掠碰撞：高速不漏判</h3>
+        <p>不用 Collider / Rigidbody。每帧记录移动前的 z，只在 <strong>prevZ &lt; 0 且 z ≥ 0</strong> 时结算一次 —— 判定的是「跨过玩家平面」这个<strong>事件</strong>，与单帧位移大小无关。结算用实际 x 坐标 + 随姿态变化的 AABB 高度区间，避免切轨插值途中按轨道编号误判。</p>
+        <p class="ndb-ask">追问「为什么不用物理」→ 规则明确的跑酷只需三个条件，省掉固定步长、碰撞矩阵与回调开销，也更好写测试；代价是没有真实物理反馈。</p>
+        <div class="ndb-file">MovePool() → 触发跨越事件</div>
+        {{CODE:sweep}}
+        <div class="ndb-file">ResolvePass() → 同轨道 + 高度区间判定</div>
+        {{CODE:aabb}}
+      </div>
+
+      <div class="ndb-card">
+        <h3><b>03</b>世界坐标网格 Shader</h3>
+        <p>地面 Plane <strong>完全不动</strong>，片元用世界坐标 + 一个 <code>_Scroll</code> uniform 算网格线，<code>frac</code> 求到最近线距离、<code>smoothstep</code> 做抗锯齿线宽，再叠距离/边缘淡出与时间脉冲。无限滚动零 GC；Pass 打 <code>SRPDefaultUnlit</code> 标签，Built-in / URP / HDRP 都能渲染。</p>
+        <div class="ndb-file">unity/Assets/Shaders/NeonGrid.shader</div>
+        {{CODE:mask}}
+        {{CODE:frag}}
+      </div>
+
+      <div class="ndb-card">
+        <h3><b>04</b>对象池压掉生成阶段 GC</h3>
+        <p>障碍与晶体整局复用：<code>active</code> 列表 + <code>free</code> 栈，取用出栈或新建、回收停用入栈，避免 <code>Instantiate</code> / <code>Destroy</code> 在每秒多次生成时制造 GC 峰值。生成器倒序遍历 active，回收不会跳元素。</p>
+        <div class="ndb-file">unity/Assets/Scripts/Pool.cs</div>
+        {{CODE:pool}}
+      </div>
+    </section>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>04</b><span>Unity 工程交付清单</span><i>零配置可运行</i></div>
+      <p class="ndb-p">把 <code>unity/Assets</code> 拷进任意 3D 工程，打开任意场景点 <b style="color:#38f5e0">Play</b> 即可运行 —— 启动入口自动搭建世界，不依赖预制体与场景配置。</p>
+      <ul class="ndb-list">
+        <li>GameBootstrap.cs</li><li>GameManager.cs</li>
+        <li>GameConfig.cs</li><li>PlayerController.cs</li>
+        <li>TrackGenerator.cs</li><li>Pool.cs</li>
+        <li>WorldBuilder.cs</li><li>WorldRefs.cs</li>
+        <li>CameraRig.cs</li><li>HUD.cs</li>
+        <li>NDInput.cs</li><li>NeonGrid.shader</li>
+        <li>SceneBuilder.cs (Editor)</li><li>Scenes/ (烘焙输出)</li>
+      </ul>
+    </section>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>05</b><span>高频追问 · 回答骨架</span><i>点开看要点</i></div>
+      <details class="ndb-q"><summary>为什么选 Unity 而不是 Unreal / Godot？</summary><p>C# 迭代快、组件模型适合小原型，移动端与跨平台导出链成熟，URP 易降配。Unreal 的 Nanite/Lumen 对低多边形风格过剩；若岗位偏写实 3A，会选 UE5 —— 选型取决于目标平台和团队。</p></details>
+      <details class="ndb-q"><summary>不同帧率手感怎么保证一致？</summary><p>位移按 dt 积分并 clamp 到 0.05s 防止切后台瞬移；横向用 1 − exp(−k·dt) 而非线性 lerp，对任意 dt 收敛到同一时间常数；跃升用显式欧拉 vy −= g·dt、y += vy·dt。</p></details>
+      <details class="ndb-q"><summary>踩过什么坑？</summary><p>① 初版按时间生成，速度上来后障碍挤在一起 → 改为按行进距离；② 按轨道编号判碰撞，切轨插值途中误判 → 改用实际 x 坐标；③ 模板场景自带相机和光，运行时再建会过曝 → 复用 Camera.main 并禁用多余光源；④ 烘焙时运行时 new Material 不序列化 → 加 PersistMaterials() 落盘为 .mat。</p></details>
+      <details class="ndb-q"><summary>性能瓶颈在哪、怎么优化？</summary><p>主要是 DrawCall（护栏/障碍独立 Mesh）与粒子创建。用 Profiler 看 GC Alloc、Frame Debugger 看合批；顺序是材质共享 → GPU Instancing / SRP Batcher → 静态合网格 → 大规模对象改 DOTS。池化已把生成阶段 GC 压掉。</p></details>
+      <details class="ndb-q"><summary>为什么还做了一个浏览器版？</summary><p>面试/投屏环境不一定装了 Unity，浏览器版零安装、离线可跑，先证明「东西能玩」；Unity 工程才是源码交付物。两份实现的配置、生成规则与碰撞逻辑一一对应，也当作同一套设计跨引擎复现的练习。</p></details>
+    </section>
+
+    <section class="ndb-sec">
+      <div class="ndb-h"><b>06</b><span>必须如实说明的边界</span></div>
+      <div class="ndb-note">
+        这是<b>准备本轮面试期间、在 AI 工具辅助下完成</b>的原型，不是过往独立负责的商业项目。<br>
+        本机 Unity/团结引擎因<b>许可证未激活</b>未能实机编译，Unity 侧只做过语法、结构与资源引用一致性静态校验；浏览器版已用无头浏览器真实渲染验证。<br>
+        建议原话：「这是我在准备这次面试时借助工具完成并跑通的原型，架构和每个取舍我都过了一遍，可以展开讲。」<b>能解释为什么这样设计，比声称全是一个人写的得分高得多。</b>
+      </div>
+    </section>
+
+    <div class="ndb-foot">
+      NEON DRIFT · 单文件离线展示页 · 无需 Unity / 无需联网 / 可直接作为邮件附件<br>
+      配套：README.md 架构说明 · INTERVIEW.md 完整讲稿 · ENGINE-FIX.md 引擎启动排查<br>
+      按 F2 或右上角按钮开合 · 关闭面板后游戏继续
+    </div>
+  </div>
+</aside>
+
+<script id="ndb-script">
+(function () {
+  'use strict';
+  var panel = document.getElementById('ndb-panel');
+  var toggle = document.getElementById('ndb-toggle');
+  var closeBtn = document.getElementById('ndb-close');
+  var resume = false;
+
+  function isOpen() { return panel.classList.contains('ndb-open'); }
+
+  function pauseGame() {
+    resume = false;
+    var g = window.NDGame;
+    if (g && g.state === 'playing') {
+      g.togglePause();
+      resume = true;
+      document.body.classList.add('ndb-reading');
+    }
+  }
+
+  function resumeGame() {
+    if (resume && window.NDGame && window.NDGame.state === 'paused') window.NDGame.togglePause();
+    resume = false;
+    document.body.classList.remove('ndb-reading');
+  }
+
+  function open() {
+    if (isOpen()) return;
+    pauseGame();
+    panel.classList.add('ndb-open');
+    document.body.classList.add('ndb-panel-open');
+  }
+  function close() {
+    if (!isOpen()) return;
+    panel.classList.remove('ndb-open');
+    document.body.classList.remove('ndb-panel-open');
+    resumeGame();
+  }
+  function flip() { isOpen() ? close() : open(); }
+
+  toggle.addEventListener('click', flip);
+  closeBtn.addEventListener('click', close);
+
+  // 面板打开时吞掉键盘事件，避免 A/D/W/S/P 继续作用于游戏
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'F2') { e.preventDefault(); e.stopImmediatePropagation(); flip(); return; }
+    if (isOpen()) {
+      if (e.code === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); return; }
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
+  window.__NDBrief = { open: open, close: close, isOpen: isOpen, game: function () { return window.NDGame; } };
+})();
+</script>
